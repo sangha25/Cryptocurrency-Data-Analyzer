@@ -1451,6 +1451,161 @@ class Client(object):
             raise BinanceWithdrawException(res['msg'])
         return res
 
+     # Withdraw Endpoints
+
+    def withdraw(self, **params):
+        """Submit a withdraw request.
+
+        https://www.binance.com/restapipub.html
+
+        Assumptions:
+
+        - You must have Withdraw permissions enabled on your API key
+        - You must have withdrawn to the address specified through the website and approved the transaction via email
+
+        :param asset: required
+        :type asset: str
+        :type address: required
+        :type address: str
+        :type addressTag: optional - Secondary address identifier for coins like XRP,XMR etc.
+        :type address: str
+        :param amount: required
+        :type amount: decimal
+        :param name: optional - Description of the address, default asset value passed will be used
+        :type name: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "msg": "success",
+                "success": true,
+                "id":"7213fea8e94b4a5593d507237e5a555b"
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceWithdrawException
+
+        """
+        # force a name for the withdrawal if one not set
+        if 'asset' in params and 'name' not in params:
+            params['name'] = params['asset']
+        res = self._request_withdraw_api('post', 'withdraw.html', True, data=params)
+        if not res['success']:
+            raise BinanceWithdrawException(res['msg'])
+        return res
+
+    def get_deposit_history(self, **params):
+        """Fetch deposit history.
+
+        https://www.binance.com/restapipub.html
+
+        :param asset: optional
+        :type asset: str
+        :type status: 0(0:pending,1:success) optional
+        :type status: int
+        :param startTime: optional
+        :type startTime: long
+        :param endTime: optional
+        :type endTime: long
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "depositList": [
+                    {
+                        "insertTime": 1508198532000,
+                        "amount": 0.04670582,
+                        "asset": "ETH",
+                        "status": 1
+                    }
+                ],
+                "success": true
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._request_withdraw_api('get', 'depositHistory.html', True, data=params)
+
+    def get_withdraw_history(self, **params):
+        """Fetch withdraw history.
+
+        https://www.binance.com/restapipub.html
+
+        :param asset: optional
+        :type asset: str
+        :type status: 0(0:Email Sent,1:Cancelled 2:Awaiting Approval 3:Rejected 4:Processing 5:Failure 6Completed) optional
+        :type status: int
+        :param startTime: optional
+        :type startTime: long
+        :param endTime: optional
+        :type endTime: long
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "withdrawList": [
+                    {
+                        "amount": 1,
+                        "address": "0x6915f16f8791d0a1cc2bf47c13a6b2a92000504b",
+                        "asset": "ETH",
+                        "applyTime": 1508198532000
+                        "status": 4
+                    },
+                    {
+                        "amount": 0.005,
+                        "address": "0x6915f16f8791d0a1cc2bf47c13a6b2a92000504b",
+                        "txId": "0x80aaabed54bdab3f6de5868f89929a2371ad21d666f20f7393d1a3389fad95a1",
+                        "asset": "ETH",
+                        "applyTime": 1508198532000,
+                        "status": 4
+                    }
+                ],
+                "success": true
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._request_withdraw_api('get', 'withdrawHistory.html', True, data=params)
+
+    def get_deposit_address(self, **params):
+        """Fetch a deposit address for a symbol
+
+        https://www.binance.com/restapipub.html
+
+        :param asset: required
+        :type asset: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "address": "0x6915f16f8791d0a1cc2bf47c13a6b2a92000504b",
+                "success": true,
+                "addressTag": "1231212",
+                "asset": "BNB"
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._request_withdraw_api('get', 'depositAddress.html', True, data=params)
+
 
 
 
