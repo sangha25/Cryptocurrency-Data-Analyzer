@@ -204,5 +204,21 @@ class Client(object):
     def _delete(self, path, signed=False, version=PUBLIC_API_VERSION, **kwargs):
         return self._request_api('delete', path, signed, version, **kwargs)
 
+# Exchange Endpoints
+
+    def get_products(self):
+        """Return list of products currently listed on Binance
+
+        Use get_exchange_info() call instead
+
+        :returns: list - List of product dictionaries
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+
+        products = self._request_website('get', 'exchange/public/product')
+        return products
+
 
 
