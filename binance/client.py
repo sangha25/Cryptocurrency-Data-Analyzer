@@ -332,6 +332,24 @@ class Client(object):
                 return item
 
         return None
+# General Endpoints
+
+    def ping(self):
+        """Test connectivity to the Rest API.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#test-connectivity
+
+        :returns: Empty array
+
+        .. code-block:: python
+
+            {}
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ping')
+
 
 
 
