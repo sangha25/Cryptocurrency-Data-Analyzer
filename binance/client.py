@@ -824,6 +824,497 @@ class Client(object):
 
         """
         return self._get('ticker/bookTicker', data=params, version=self.PRIVATE_API_VERSION)
+    
+    # Account Endpoints
+
+    def create_order(self, **params):
+        """Send in a new order
+
+        Any order with an icebergQty MUST have timeInForce set to GTC.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#new-order--trade
+
+        :param symbol: required
+        :type symbol: str
+        :param side: required
+        :type side: enum
+        :param type: required
+        :type type: enum
+        :param timeInForce: required if limit order
+        :type timeInForce: enum
+        :param quantity: required
+        :type quantity: decimal
+        :param price: required
+        :type price: str
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param icebergQty: Used with LIMIT, STOP_LOSS_LIMIT, and TAKE_PROFIT_LIMIT to create an iceberg order.
+        :type icebergQty: decimal
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        Response ACK:
+
+        .. code-block:: python
+
+            {
+                "symbol":"LTCBTC",
+                "orderId": 1,
+                "clientOrderId": "myOrder1" # Will be newClientOrderId
+                "transactTime": 1499827319559
+            }
+
+        Response RESULT:
+
+        .. code-block:: python
+
+            {
+                "symbol": "BTCUSDT",
+                "orderId": 28,
+                "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+                "transactTime": 1507725176595,
+                "price": "0.00000000",
+                "origQty": "10.00000000",
+                "executedQty": "10.00000000",
+                "status": "FILLED",
+                "timeInForce": "GTC",
+                "type": "MARKET",
+                "side": "SELL"
+            }
+
+        Response FULL:
+
+        .. code-block:: python
+
+            {
+                "symbol": "BTCUSDT",
+                "orderId": 28,
+                "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+                "transactTime": 1507725176595,
+                "price": "0.00000000",
+                "origQty": "10.00000000",
+                "executedQty": "10.00000000",
+                "status": "FILLED",
+                "timeInForce": "GTC",
+                "type": "MARKET",
+                "side": "SELL",
+                "fills": [
+                    {
+                        "price": "4000.00000000",
+                        "qty": "1.00000000",
+                        "commission": "4.00000000",
+                        "commissionAsset": "USDT"
+                    },
+                    {
+                        "price": "3999.00000000",
+                        "qty": "5.00000000",
+                        "commission": "19.99500000",
+                        "commissionAsset": "USDT"
+                    },
+                    {
+                        "price": "3998.00000000",
+                        "qty": "2.00000000",
+                        "commission": "7.99600000",
+                        "commissionAsset": "USDT"
+                    },
+                    {
+                        "price": "3997.00000000",
+                        "qty": "1.00000000",
+                        "commission": "3.99700000",
+                        "commissionAsset": "USDT"
+                    },
+                    {
+                        "price": "3995.00000000",
+                        "qty": "1.00000000",
+                        "commission": "3.99500000",
+                        "commissionAsset": "USDT"
+                    }
+                ]
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        return self._post('order', True, data=params)
+
+    def order_limit(self, timeInForce=TIME_IN_FORCE_GTC, **params):
+        """Send in a new limit order
+
+        Any order with an icebergQty MUST have timeInForce set to GTC.
+
+        :param symbol: required
+        :type symbol: str
+        :param side: required
+        :type side: enum
+        :param quantity: required
+        :type quantity: decimal
+        :param price: required
+        :type price: str
+        :param timeInForce: default Good till cancelled
+        :type timeInForce: enum
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param icebergQty: Used with LIMIT, STOP_LOSS_LIMIT, and TAKE_PROFIT_LIMIT to create an iceberg order.
+        :type icebergQty: decimal
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'type': self.ORDER_TYPE_LIMIT,
+            'timeInForce': timeInForce
+        })
+        return self.create_order(**params)
+
+    def order_limit_buy(self, timeInForce=TIME_IN_FORCE_GTC, **params):
+        """Send in a new limit buy order
+
+        Any order with an icebergQty MUST have timeInForce set to GTC.
+
+        :param symbol: required
+        :type symbol: str
+        :param quantity: required
+        :type quantity: decimal
+        :param price: required
+        :type price: str
+        :param timeInForce: default Good till cancelled
+        :type timeInForce: enum
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param stopPrice: Used with stop orders
+        :type stopPrice: decimal
+        :param icebergQty: Used with iceberg orders
+        :type icebergQty: decimal
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'side': self.SIDE_BUY,
+        })
+        return self.order_limit(timeInForce=timeInForce, **params)
+
+    def order_limit_sell(self, timeInForce=TIME_IN_FORCE_GTC, **params):
+        """Send in a new limit sell order
+
+        :param symbol: required
+        :type symbol: str
+        :param quantity: required
+        :type quantity: decimal
+        :param price: required
+        :type price: str
+        :param timeInForce: default Good till cancelled
+        :type timeInForce: enum
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param stopPrice: Used with stop orders
+        :type stopPrice: decimal
+        :param icebergQty: Used with iceberg orders
+        :type icebergQty: decimal
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'side': self.SIDE_SELL
+        })
+        return self.order_limit(timeInForce=timeInForce, **params)
+
+    def order_market(self, **params):
+        """Send in a new market order
+
+        :param symbol: required
+        :type symbol: str
+        :param side: required
+        :type side: enum
+        :param quantity: required
+        :type quantity: decimal
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'type': self.ORDER_TYPE_MARKET
+        })
+        return self.create_order(**params)
+
+    def order_market_buy(self, **params):
+        """Send in a new market buy order
+
+        :param symbol: required
+        :type symbol: str
+        :param quantity: required
+        :type quantity: decimal
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'side': self.SIDE_BUY
+        })
+        return self.order_market(**params)
+
+    def order_market_sell(self, **params):
+        """Send in a new market sell order
+
+        :param symbol: required
+        :type symbol: str
+        :param quantity: required
+        :type quantity: decimal
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        See order endpoint for full response options
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+        """
+        params.update({
+            'side': self.SIDE_SELL
+        })
+        return self.order_market(**params)
+
+    def create_test_order(self, **params):
+        """Test new order creation and signature/recvWindow long. Creates and validates a new order but does not send it into the matching engine.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#test-new-order-trade
+
+        :param symbol: required
+        :type symbol: str
+        :param side: required
+        :type side: enum
+        :param type: required
+        :type type: enum
+        :param timeInForce: required if limit order
+        :type timeInForce: enum
+        :param quantity: required
+        :type quantity: decimal
+        :param price: required
+        :type price: str
+        :param newClientOrderId: A unique id for the order. Automatically generated if not sent.
+        :type newClientOrderId: str
+        :param icebergQty: Used with iceberg orders
+        :type icebergQty: decimal
+        :param newOrderRespType: Set the response JSON. ACK, RESULT, or FULL; default: RESULT.
+        :type newOrderRespType: enum
+        :param recvWindow: The number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {}
+
+        :raises: BinanceResponseException, BinanceAPIException, BinanceOrderException, BinanceOrderMinAmountException, BinanceOrderMinPriceException, BinanceOrderMinTotalException, BinanceOrderUnknownSymbolException, BinanceOrderInactiveSymbolException
+
+
+        """
+        return self._post('order/test', True, data=params)
+
+    def get_order(self, **params):
+        """Check an order's status. Either orderId or origClientOrderId must be sent.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#query-order-user_data
+
+        :param symbol: required
+        :type symbol: str
+        :param orderId: The unique order id
+        :type orderId: int
+        :param origClientOrderId: optional
+        :type origClientOrderId: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "symbol": "LTCBTC",
+                "orderId": 1,
+                "clientOrderId": "myOrder1",
+                "price": "0.1",
+                "origQty": "1.0",
+                "executedQty": "0.0",
+                "status": "NEW",
+                "timeInForce": "GTC",
+                "type": "LIMIT",
+                "side": "BUY",
+                "stopPrice": "0.0",
+                "icebergQty": "0.0",
+                "time": 1499827319559
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('order', True, data=params)
+
+    def get_all_orders(self, **params):
+        """Get all account orders; active, canceled, or filled.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#all-orders-user_data
+
+        :param symbol: required
+        :type symbol: str
+        :param orderId: The unique order id
+        :type orderId: int
+        :param limit: Default 500; max 500.
+        :type limit: int
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "orderId": 1,
+                    "clientOrderId": "myOrder1",
+                    "price": "0.1",
+                    "origQty": "1.0",
+                    "executedQty": "0.0",
+                    "status": "NEW",
+                    "timeInForce": "GTC",
+                    "type": "LIMIT",
+                    "side": "BUY",
+                    "stopPrice": "0.0",
+                    "icebergQty": "0.0",
+                    "time": 1499827319559
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('allOrders', True, data=params)
+
+    def cancel_order(self, **params):
+        """Cancel an active order. Either orderId or origClientOrderId must be sent.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#cancel-order-trade
+
+        :param symbol: required
+        :type symbol: str
+        :param orderId: The unique order id
+        :type orderId: int
+        :param origClientOrderId: optional
+        :type origClientOrderId: str
+        :param newClientOrderId: Used to uniquely identify this cancel. Automatically generated by default.
+        :type newClientOrderId: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "symbol": "LTCBTC",
+                "origClientOrderId": "myOrder1",
+                "orderId": 1,
+                "clientOrderId": "cancelMyOrder1"
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._delete('order', True, data=params)
+
+    def get_open_orders(self, **params):
+        """Get all open orders on a symbol.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#current-open-orders-user_data
+
+        :param symbol: optional
+        :type symbol: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "orderId": 1,
+                    "clientOrderId": "myOrder1",
+                    "price": "0.1",
+                    "origQty": "1.0",
+                    "executedQty": "0.0",
+                    "status": "NEW",
+                    "timeInForce": "GTC",
+                    "type": "LIMIT",
+                    "side": "BUY",
+                    "stopPrice": "0.0",
+                    "icebergQty": "0.0",
+                    "time": 1499827319559
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('openOrders', True, data=params)
+
 
 
 
