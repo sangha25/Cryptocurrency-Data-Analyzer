@@ -350,7 +350,7 @@ class Client(object):
         """
         return self._get('ping')
 
-def get_server_time(self):
+    def get_server_time(self):
         """Test connectivity to the Rest API and get the current server time.
 
         https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#check-server-time
