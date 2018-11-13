@@ -69,4 +69,19 @@ class BinanceOrderUnknownSymbolException(BinanceOrderException):
         super(BinanceOrderUnknownSymbolException, self).__init__(-1013, message)
 
 
+class BinanceOrderInactiveSymbolException(BinanceOrderException):
+
+    def __init__(self, value):
+        message = "Attempting to trade an inactive symbol %s" % value
+        super(BinanceOrderInactiveSymbolException, self).__init__(-1013, message)
+
+
+class BinanceWithdrawException(Exception):
+    def __init__(self, message):
+        if message == u'å‚æ•°å¼‚å¸¸':
+            message = 'Withdraw to this address through the website first'
+        self.message = message
+
+    def __str__(self):
+
 
