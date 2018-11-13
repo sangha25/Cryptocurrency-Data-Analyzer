@@ -258,6 +258,8 @@ class DepthCacheManager(object):
 
         :return:
         """
- 
+ self._bm.close()
+        self._depth_cache = None
+
 
 
