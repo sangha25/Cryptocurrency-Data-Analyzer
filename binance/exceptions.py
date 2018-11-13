@@ -22,3 +22,22 @@ class BinanceAPIException(Exception):
     def __str__(self):  # pragma: no cover
         return 'APIError(code=%s): %s' % (self.code, self.message)
 
+
+class BinanceRequestException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return 'BinanceRequestException: %s' % self.message
+
+
+class BinanceOrderException(Exception):
+
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+    def __str__(self):
+        return 'BinanceOrderException(code=%s): %s' % (self.code, self.message)
+
+
