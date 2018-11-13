@@ -1606,6 +1606,74 @@ class Client(object):
         """
         return self._request_withdraw_api('get', 'depositAddress.html', True, data=params)
 
+     # User Stream Endpoints
+
+    def stream_get_listen_key(self):
+        """Start a new user data stream and return the listen key
+        If a stream already exists it should return the same key.
+        If the stream becomes invalid a new key is returned.
+
+        Can be used to keep the user stream alive.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#start-user-data-stream-user_stream
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "listenKey": "pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1"
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        res = self._post('userDataStream', False, data={})
+        return res['listenKey']
+
+    def stream_keepalive(self, listenKey):
+        """PING a user data stream to prevent a time out.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#keepalive-user-data-stream-user_stream
+
+        :param listenKey: required
+        :type listenKey: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {}
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        params = {
+            'listenKey': listenKey
+        }
+        return self._put('userDataStream', False, data=params)
+
+    def stream_close(self, listenKey):
+        """Close out a user data stream.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#close-user-data-stream-user_stream
+
+        :param listenKey: required
+        :type listenKey: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {}
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        params = {
+            'listenKey': listenKey
+        }
+        return self._delete('userDataStream', False, data=params)
 
 
 
