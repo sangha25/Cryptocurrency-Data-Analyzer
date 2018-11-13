@@ -220,7 +220,7 @@ class Client(object):
         products = self._request_website('get', 'exchange/public/product')
         return products
 
-def get_exchange_info(self):
+    def get_exchange_info(self):
         """Return rate limits and list of symbols
 
         :returns: list - List of product dictionaries
