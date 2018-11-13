@@ -1315,6 +1315,143 @@ class Client(object):
         """
         return self._get('openOrders', True, data=params)
 
+    # User Stream Endpoints
+    def get_account(self, **params):
+        """Get current account information.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#account-information-user_data
+
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "makerCommission": 15,
+                "takerCommission": 15,
+                "buyerCommission": 0,
+                "sellerCommission": 0,
+                "canTrade": true,
+                "canWithdraw": true,
+                "canDeposit": true,
+                "balances": [
+                    {
+                        "asset": "BTC",
+                        "free": "4723846.89208129",
+                        "locked": "0.00000000"
+                    },
+                    {
+                        "asset": "LTC",
+                        "free": "4763368.68006011",
+                        "locked": "0.00000000"
+                    }
+                ]
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('account', True, data=params)
+
+    def get_asset_balance(self, asset, **params):
+        """Get current asset balance.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#account-information-user_data
+
+        :param asset: required
+        :type asset: str
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: dictionary or None if not found
+
+        .. code-block:: python
+
+            {
+                "asset": "BTC",
+                "free": "4723846.89208129",
+                "locked": "0.00000000"
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        res = self.get_account(**params)
+        # find asset balance in list of balances
+        if "balances" in res:
+            for bal in res['balances']:
+                if bal['asset'].lower() == asset.lower():
+                    return bal
+        return None
+
+    def get_my_trades(self, **params):
+        """Get trades for a specific symbol.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#account-trade-list-user_data
+
+        :param symbol: required
+        :type symbol: str
+        :param limit: Default 500; max 500.
+        :type limit: int
+        :param fromId: TradeId to fetch from. Default gets most recent trades.
+        :type fromId: int
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "id": 28457,
+                    "price": "4.00000100",
+                    "qty": "12.00000000",
+                    "commission": "10.10000000",
+                    "commissionAsset": "BNB",
+                    "time": 1499865549590,
+                    "isBuyer": true,
+                    "isMaker": false,
+                    "isBestMatch": true
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('myTrades', True, data=params)
+
+    def get_account_status(self, **params):
+        """Get account status detail.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/wapi-api.md#account-status-user_data
+
+        :param recvWindow: the number of milliseconds the request is valid for
+        :type recvWindow: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "msg": "Order failed:Low Order fill rate! Will be reactivated after 5 minutes.",
+                "success": true,
+                "objs": [
+                    "5"
+                ]
+            }
+
+        :raises: BinanceWithdrawException
+
+        """
+        res = self._request_withdraw_api('get', 'accountStatus.html', True, data=params)
+        if not res['success']:
+            raise BinanceWithdrawException(res['msg'])
+        return res
+
+
 
 
 
