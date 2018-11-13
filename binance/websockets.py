@@ -29,3 +29,33 @@ class BinanceClientProtocol(WebSocketClientProtocol):
             else:
                 self.factory.callback(payload_obj)
 
+
+class BinanceReconnectingClientFactory(ReconnectingClientFactory):
+
+    # set initial delay to a short time
+    initialDelay = 0.1
+
+    maxDelay = 10
+
+    maxRetries = 5
+
+
+class BinanceClientFactory(WebSocketClientFactory, BinanceReconnectingClientFactory):
+
+    protocol = BinanceClientProtocol
+    _reconnect_error_payload = {
+        'e': 'error',
+        'm': 'Max reconnect retries reached'
+    }
+
+    def clientConnectionFailed(self, connector, reason):
+        self.retry(connector)
+        if self.retries > self.maxRetries:
+            self.callback(self._reconnect_error_payload)
+
+    def clientConnectionLost(self, connector, reason):
+        self.retry(connector)
+        if self.retries > self.maxRetries:
+            self.callback(self._reconnect_error_payload)
+
+
