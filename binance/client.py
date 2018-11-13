@@ -368,6 +368,463 @@ class Client(object):
         """
         return self._get('time')
 
+ # Market Data Endpoints
+
+    def get_all_tickers(self):
+        """Latest price for all symbols.
+
+        https://www.binance.com/restapipub.html#symbols-price-ticker
+
+        :returns: List of market tickers
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "price": "4.00000200"
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "price": "0.07946600"
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ticker/allPrices')
+
+    def get_orderbook_tickers(self):
+        """Best price/qty on the order book for all symbols.
+
+        https://www.binance.com/restapipub.html#symbols-order-book-ticker
+
+        :returns: List of order book market entries
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "bidPrice": "4.00000000",
+                    "bidQty": "431.00000000",
+                    "askPrice": "4.00000200",
+                    "askQty": "9.00000000"
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "bidPrice": "0.07946700",
+                    "bidQty": "9.00000000",
+                    "askPrice": "100000.00000000",
+                    "askQty": "1000.00000000"
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ticker/allBookTickers')
+
+    def get_order_book(self, **params):
+        """Get the Order Book for the market
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#order-book
+
+        :param symbol: required
+        :type symbol: str
+        :param limit:  Default 100; max 100
+        :type limit: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "lastUpdateId": 1027024,
+                "bids": [
+                    [
+                        "4.00000000",     # PRICE
+                        "431.00000000",   # QTY
+                        []                # Can be ignored
+                    ]
+                ],
+                "asks": [
+                    [
+                        "4.00000200",
+                        "12.00000000",
+                        []
+                    ]
+                ]
+            }
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('depth', data=params)
+
+    def get_recent_trades(self, **params):
+        """Get recent trades (up to last 500).
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#recent-trades-list
+
+        :param symbol: required
+        :type symbol: str
+        :param limit:  Default 500; max 500.
+        :type limit: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "id": 28457,
+                    "price": "4.00000100",
+                    "qty": "12.00000000",
+                    "time": 1499865549590,
+                    "isBuyerMaker": true,
+                    "isBestMatch": true
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('trades', data=params)
+
+    def get_historical_trades(self, **params):
+        """Get older trades.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#recent-trades-list
+
+        :param symbol: required
+        :type symbol: str
+        :param limit:  Default 500; max 500.
+        :type limit: int
+        :param fromId:  TradeId to fetch from. Default gets most recent trades.
+        :type fromId: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "id": 28457,
+                    "price": "4.00000100",
+                    "qty": "12.00000000",
+                    "time": 1499865549590,
+                    "isBuyerMaker": true,
+                    "isBestMatch": true
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('historicalTrades', data=params)
+
+    def get_aggregate_trades(self, **params):
+        """Get compressed, aggregate trades. Trades that fill at the time,
+        from the same order, with the same price will have the quantity aggregated.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#compressedaggregate-trades-list
+
+        :param symbol: required
+        :type symbol: str
+        :param fromId:  ID to get aggregate trades from INCLUSIVE.
+        :type fromId: str
+        :param startTime: Timestamp in ms to get aggregate trades from INCLUSIVE.
+        :type startTime: int
+        :param endTime: Timestamp in ms to get aggregate trades until INCLUSIVE.
+        :type endTime: int
+        :param limit:  Default 500; max 500.
+        :type limit: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                {
+                    "a": 26129,         # Aggregate tradeId
+                    "p": "0.01633102",  # Price
+                    "q": "4.70443515",  # Quantity
+                    "f": 27781,         # First tradeId
+                    "l": 27781,         # Last tradeId
+                    "T": 1498793709153, # Timestamp
+                    "m": true,          # Was the buyer the maker?
+                    "M": true           # Was the trade the best price match?
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('aggTrades', data=params)
+
+    def get_klines(self, **params):
+        """Kline/candlestick bars for a symbol. Klines are uniquely identified by their open time.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data
+
+        :param symbol: required
+        :type symbol: str
+        :param interval: -
+        :type interval: enum
+        :param limit: - Default 500; max 500.
+        :type limit: int
+        :param startTime:
+        :type startTime: int
+        :param endTime:
+        :type endTime: int
+
+        :returns: API response
+
+        .. code-block:: python
+
+            [
+                [
+                    1499040000000,      # Open time
+                    "0.01634790",       # Open
+                    "0.80000000",       # High
+                    "0.01575800",       # Low
+                    "0.01577100",       # Close
+                    "148976.11427815",  # Volume
+                    1499644799999,      # Close time
+                    "2434.19055334",    # Quote asset volume
+                    308,                # Number of trades
+                    "1756.87402397",    # Taker buy base asset volume
+                    "28.46694368",      # Taker buy quote asset volume
+                    "17928899.62484339" # Can be ignored
+                ]
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('klines', data=params)
+
+    def get_historical_klines(self, symbol, interval, start_str, end_str=None):
+        """Get Historical Klines from Binance
+
+        See dateparse docs for valid start and end string formats http://dateparser.readthedocs.io/en/latest/
+
+        If using offset strings for dates add "UTC" to date string e.g. "now UTC", "11 hours ago UTC"
+
+        :param symbol: Name of symbol pair e.g BNBBTC
+        :type symbol: str
+        :param interval: Biannce Kline interval
+        :type interval: str
+        :param start_str: Start date string in UTC format
+        :type start_str: str
+        :param end_str: optional - end date string in UTC format
+        :type end_str: str
+
+        :return: list of OHLCV values
+
+        """
+        # init our list
+        output_data = []
+
+        # setup the max limit
+        limit = 500
+
+        # convert interval to useful value in seconds
+        timeframe = interval_to_milliseconds(interval)
+
+        # convert our date strings to milliseconds
+        start_ts = date_to_milliseconds(start_str)
+
+        # if an end time was passed convert it
+        end_ts = None
+        if end_str:
+            end_ts = date_to_milliseconds(end_str)
+
+        idx = 0
+        # it can be difficult to know when a symbol was listed on Binance so allow start time to be before list date
+        symbol_existed = False
+        while True:
+            # fetch the klines from start_ts up to max 500 entries or the end_ts if set
+            temp_data = self.get_klines(
+                symbol=symbol,
+                interval=interval,
+                limit=limit,
+                startTime=start_ts,
+                endTime=end_ts
+            )
+
+            # handle the case where our start date is before the symbol pair listed on Binance
+            if not symbol_existed and len(temp_data):
+                symbol_existed = True
+
+            if symbol_existed:
+                # append this loops data to our output data
+                output_data += temp_data
+
+                # update our start timestamp using the last value in the array and add the interval timeframe
+                start_ts = temp_data[len(temp_data) - 1][0] + timeframe
+            else:
+                # it wasn't listed yet, increment our start date
+                start_ts += timeframe
+
+            idx += 1
+            # check if we received less than the required limit and exit the loop
+            if len(temp_data) < limit:
+                # exit the while loop
+                break
+
+            # sleep after every 3rd call to be kind to the API
+            if idx % 3 == 0:
+                time.sleep(1)
+
+        return output_data
+
+    def get_ticker(self, **params):
+        """24 hour price change statistics.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#24hr-ticker-price-change-statistics
+
+        :param symbol:
+        :type symbol: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "priceChange": "-94.99999800",
+                "priceChangePercent": "-95.960",
+                "weightedAvgPrice": "0.29628482",
+                "prevClosePrice": "0.10002000",
+                "lastPrice": "4.00000200",
+                "bidPrice": "4.00000000",
+                "askPrice": "4.00000200",
+                "openPrice": "99.00000000",
+                "highPrice": "100.00000000",
+                "lowPrice": "0.10000000",
+                "volume": "8913.30000000",
+                "openTime": 1499783499040,
+                "closeTime": 1499869899040,
+                "fristId": 28385,   # First tradeId
+                "lastId": 28460,    # Last tradeId
+                "count": 76         # Trade count
+            }
+
+        OR
+
+        .. code-block:: python
+
+            [
+                {
+                    "priceChange": "-94.99999800",
+                    "priceChangePercent": "-95.960",
+                    "weightedAvgPrice": "0.29628482",
+                    "prevClosePrice": "0.10002000",
+                    "lastPrice": "4.00000200",
+                    "bidPrice": "4.00000000",
+                    "askPrice": "4.00000200",
+                    "openPrice": "99.00000000",
+                    "highPrice": "100.00000000",
+                    "lowPrice": "0.10000000",
+                    "volume": "8913.30000000",
+                    "openTime": 1499783499040,
+                    "closeTime": 1499869899040,
+                    "fristId": 28385,   # First tradeId
+                    "lastId": 28460,    # Last tradeId
+                    "count": 76         # Trade count
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ticker/24hr', data=params)
+
+    def get_symbol_ticker(self, **params):
+        """Latest price for a symbol or symbols.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#24hr-ticker-price-change-statistics
+
+        :param symbol:
+        :type symbol: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "symbol": "LTCBTC",
+                "price": "4.00000200"
+            }
+
+        OR
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "price": "4.00000200"
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "price": "0.07946600"
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ticker/price', data=params, version=self.PRIVATE_API_VERSION)
+
+    def get_orderbook_ticker(self, **params):
+        """Latest price for a symbol or symbols.
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#symbol-order-book-ticker
+
+        :param symbol:
+        :type symbol: str
+
+        :returns: API response
+
+        .. code-block:: python
+
+            {
+                "symbol": "LTCBTC",
+                "bidPrice": "4.00000000",
+                "bidQty": "431.00000000",
+                "askPrice": "4.00000200",
+                "askQty": "9.00000000"
+            }
+
+        OR
+
+        .. code-block:: python
+
+            [
+                {
+                    "symbol": "LTCBTC",
+                    "bidPrice": "4.00000000",
+                    "bidQty": "431.00000000",
+                    "askPrice": "4.00000200",
+                    "askQty": "9.00000000"
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "bidPrice": "0.07946700",
+                    "bidQty": "9.00000000",
+                    "askPrice": "100000.00000000",
+                    "askQty": "1000.00000000"
+                }
+            ]
+
+        :raises: BinanceResponseException, BinanceAPIException
+
+        """
+        return self._get('ticker/bookTicker', data=params, version=self.PRIVATE_API_VERSION)
+
 
 
 
