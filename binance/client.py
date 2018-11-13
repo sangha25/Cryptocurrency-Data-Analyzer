@@ -284,7 +284,7 @@ class Client(object):
 
         return self._get('exchangeInfo')
 
-def get_symbol_info(self, symbol):
+    def get_symbol_info(self, symbol):
         """Return information about a symbol
 
         :param symbol: required e.g BNBBTC
