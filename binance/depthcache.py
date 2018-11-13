@@ -108,4 +108,14 @@ class DepthCache(object):
         return DepthCache.sort_depth(self._asks, reverse=False)
 
 
+    @staticmethod
+    def sort_depth(vals, reverse=False):
+        """Sort bids or asks by price
+        """
+        lst = [[float(price), quantity] for price, quantity in vals.items()]
+        lst = sorted(lst, key=itemgetter(0), reverse=reverse)
+        return lst
+
+
+
 
